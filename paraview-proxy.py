@@ -1,3 +1,8 @@
+#!/usr/bin/env python3.6
+
+# this is code is not thought to be used directly, but rather as a basis for understanding how
+# to implement a webproxy with websocket support.
+
 from aiohttp import web
 from aiohttp import client
 import aiohttp
@@ -16,6 +21,9 @@ mountPoint = '/fakeUuid'
 async def handler(req):
     proxyPath = req.match_info.get('proxyPath','no proxyPath placeholder defined')
     reqH = req.headers.copy()
+    
+    # handle the websocket request
+    
     if reqH['connection'] == 'Upgrade' and reqH['upgrade'] == 'websocket' and req.method == 'GET':
 
       ws_server = web.WebSocketResponse()
@@ -46,6 +54,7 @@ async def handler(req):
             else:
               raise ValueError('unexpected message type: %s',pprint.pformat(msg))
 
+        # keep forwarding websocket data in both directions
         await asyncio.wait([ws_forward(ws_server,ws_client),ws_forward(ws_client,ws_server)],return_when=asyncio.FIRST_COMPLETED)
 
         return ws_server
@@ -59,6 +68,8 @@ async def handler(req):
           headers = res.headers.copy()
           del headers['content-length']
           body = await res.read()
+          # the paraview visualizer needs some patching to properly find
+          # its constituating parts
           if proxyPath == '/Visualizer.js':
             body = body.replace(b'"/ws"',b'"%s/ws"' % mountPoint.encode(),1)
             body = body.replace(b'"/paraview/"',b'"%s/paraview/"' % mountPoint.encode(),1)
