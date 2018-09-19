@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.6
 
 # this is code is not thought to be used directly, but rather as a basis for understanding how
-# to implement a webproxy with websocket support.
+# to implement a webproxy with websocket support in python
 
 from aiohttp import web
 from aiohttp import client
