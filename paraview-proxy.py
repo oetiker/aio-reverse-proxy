@@ -59,6 +59,7 @@ async def handler(req):
 
         return ws_server
     else:
+      # handle normal requests by passing them on downstream
       async with client.request(
           req.method,baseUrl+proxyPath,
           headers = reqH,
